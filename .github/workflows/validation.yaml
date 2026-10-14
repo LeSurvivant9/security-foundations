@@ -32,4 +32,4 @@ jobs:
       # The full stack is not started in CI: DVWA is pinned for ARM64 while
       # GitHub-hosted Ubuntu runners are AMD64. The custom images are portable.
       - name: Build local lab images
-        run: docker compose build kali gateway
+        run: docker compose --env-file .env.example build kali gateway
