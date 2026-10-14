@@ -1,0 +1,43 @@
+\section{Conception de la maquette}\label{sec:maquette}
+
+La maquette est orchestrée avec Docker Compose.
+Elle comporte les services interconnectés exigés par le sujet : l'application web DVWA et son service de données MariaDB\@.
+Deux composants supplémentaires séparent les rôles d'attaque, de détection et de filtrage : un conteneur Kali et une passerelle.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.1cm,
+        box/.style={draw, rounded corners, align=center, minimum width=2.6cm, minimum height=1.05cm, fill=black!4},
+        flow/.style={-{Stealth[length=2.2mm]}, thick}
+    ]
+        \node[box] (kali) {Kali Linux\\172.28.10.10\\\scriptsize réseau \texttt{attack}};
+        \node[box, right=of kali] (gateway) {Passerelle\\Suricata + iptables\\\scriptsize 172.28.10.254 / 172.28.20.254};
+        \node[box, right=of gateway] (dvwa) {DVWA\\172.28.20.20\\\scriptsize réseau \texttt{app}};
+        \node[box, below=of dvwa] (db) {MariaDB\\172.28.30.30\\\scriptsize réseau \texttt{data}};
+        \draw[flow] (kali) -- node[above, font=\scriptsize]{HTTP} (gateway);
+        \draw[flow] (gateway) -- (dvwa);
+        \draw[flow] (dvwa) -- (db);
+    \end{tikzpicture}
+    \caption{Architecture logique de la maquette isolée.}\label{fig:architecture}
+\end{figure}
+
+Les réseaux Docker ne publient aucun port vers l'hôte.
+Le poste Kali ne possède qu'un accès routé vers le réseau applicatif, obligatoirement au travers de la passerelle.
+MariaDB n'est raccordée qu'au réseau \texttt{data} : elle n'est donc pas joignable directement depuis Kali.
+Ce cloisonnement limite le périmètre de l'exercice tout en conservant des flux représentatifs d'une architecture web à plusieurs tiers.
+
+\begin{table}[H]
+    \centering
+    \caption{Rôle des composants de la maquette.}\label{tab:composants}
+    \begin{tabular}{@{}p{0.22\textwidth}p{0.27\textwidth}p{0.39\textwidth}@{}}
+        \toprule
+        Composant & Fonction & Justification \\
+        \midrule
+        Kali & Poste d'audit et de test & Centralise les outils employés dans le périmètre autorisé. \\
+        Passerelle & Routage, IDS et filtrage & Observe les requêtes avant la traduction d'adresse et contrôle les flux. \\
+        DVWA & Application cible & Fournit un environnement explicitement vulnérable et reproductible~\cite{dvwa}. \\
+        MariaDB & Service de données & Représente le composant contenant les données de l'application. \\
+        \bottomrule
+    \end{tabular}
+\end{table}

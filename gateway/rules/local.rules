@@ -1,0 +1,4 @@
+# Teaching-lab detection rule.  It flags a common suspicious query token sent
+# to the intentionally vulnerable web application.  Tune or replace it once
+# the group has selected and documented its authorised attack scenario.
+alert http any any -> 172.28.20.20 80 (msg:"LAB DVWA suspicious query token"; flow:to_server,established; http.uri; content:"union"; nocase; sid:1000001; rev:1;)

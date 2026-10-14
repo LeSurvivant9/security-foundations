@@ -1,0 +1,132 @@
+name: security-fondations
+
+services:
+  kali:
+    build:
+      context: ./kali
+    image: security-fondations-kali:local
+    init: true
+    stdin_open: true
+    tty: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+    networks:
+      attack:
+        ipv4_address: 172.28.10.10
+    volumes:
+      - ./evidence:/home/kali/evidence
+    command: ["/usr/local/bin/init-route.sh"]
+    healthcheck:
+      test:
+        ["CMD-SHELL", "ip route get 172.28.20.20 | grep -q 'via 172.28.10.254'"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: "no"
+
+  gateway:
+    build:
+      context: ./gateway
+    image: security-fondations-gateway:local
+    init: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    security_opt:
+      - no-new-privileges:true
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    networks:
+      attack:
+        ipv4_address: 172.28.10.254
+      app:
+        ipv4_address: 172.28.20.254
+    volumes:
+      - ./evidence/suricata:/var/log/suricata
+      - ./gateway/rules:/etc/suricata/local-rules:ro
+      - ./firewall:/opt/lab/firewall:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pgrep -f '[s]uricata' >/dev/null && ip -o -4 addr show | grep -q '172\\.28\\.10\\.' && ip -o -4 addr show | grep -q '172\\.28\\.20\\.'",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: "no"
+
+  dvwa:
+    # ARM64 manifest pinned after verification on 2026-10-14.
+    image: ghcr.io/digininja/dvwa@sha256:a1087ec6fe54bf83da65c772377f81534b8c9bf085f11507ad0f9509124a1e08
+    environment:
+      DB_SERVER: db
+      TZ: ${TZ:-Etc/UTC}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      app:
+        ipv4_address: 172.28.20.20
+      data:
+        ipv4_address: 172.28.30.20
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'php -r ''exit((int)!@file_get_contents("http://127.0.0.1/"));''',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: "no"
+
+  db:
+    # MariaDB 10.11 multi-architecture manifest pinned after verification on 2026-10-14.
+    image: docker.io/library/mariadb@sha256:7db29378d4fdab73f8123bbc2b48905c90d1a4b00cf848b028f1e81e623257f2
+    environment:
+      MYSQL_DATABASE: dvwa
+      MYSQL_USER: dvwa
+      MYSQL_PASSWORD: ${DVWA_DB_PASSWORD:?Copy .env.example to .env first}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Copy .env.example to .env first}
+      TZ: ${TZ:-Etc/UTC}
+    networks:
+      data:
+        ipv4_address: 172.28.30.30
+    volumes:
+      - database-data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mariadb-admin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: "no"
+
+networks:
+  attack:
+    ipam:
+      config:
+        - subnet: 172.28.10.0/24
+  app:
+    ipam:
+      config:
+        - subnet: 172.28.20.0/24
+  data:
+    ipam:
+      config:
+        - subnet: 172.28.30.0/24
+
+volumes:
+  database-data:

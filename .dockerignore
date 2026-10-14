@@ -1,0 +1,14 @@
+# Root-level Docker ignore rules for future builds using this repository as a
+# build context. Current service-specific contexts have their own files below.
+.git/
+.idea/
+.junie/
+.env
+.env.*
+docs/
+annex/
+evidence/
+node_modules/
+**/__pycache__/
+**/*.py[cod]
+**/.DS_Store

@@ -1,0 +1,27 @@
+% !TEX program = lualatex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{mystyle}
+
+\input{metadata}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\listoffigures
+\listoftables
+\newpage
+
+\input{sections/introduction}
+\input{sections/maquette}
+\input{sections/audit}
+\input{sections/exploitation}
+\input{sections/detection-protection}
+\input{sections/conclusion}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,11 @@
+\section{Introduction}\label{sec:introduction}
+
+Ce projet étudie une chaîne complète de sécurité, depuis l'identification de vulnérabilités jusqu'à la mise en place de mesures de détection et de protection.
+Il est réalisé exclusivement sur une maquette locale et isolée, conçue pour cet exercice.
+Aucune action n'est menée sur un système tiers ou sur le réseau de l'établissement.
+La cible est l'application volontairement vulnérable Damn Vulnerable Web Application (DVWA), reliée à une base de données MariaDB\@.
+Un poste Kali Linux représente l'attaquant et une passerelle intercale un système de détection Suricata ainsi que le pare-feu iptables.
+Cette séparation permet d'observer le trafic entre l'attaquant et l'application, sans exposer la maquette à l'extérieur.
+Deux pistes d'attaque sont étudiées : une injection SQL sur l'application web et une tentative de force brute sur son mécanisme d'authentification.
+Les résultats présentés dans ce rapport doivent être appuyés par les traces collectées durant les essais ; les éléments encore non mesurés sont signalés comme tels.
+L'objectif est de justifier les choix techniques, de mesurer les conséquences réelles de chaque scénario et de vérifier qu'un rejeu déclenche une alerte, puis devient inopérant après l'application de la protection.

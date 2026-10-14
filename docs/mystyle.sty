@@ -1,0 +1,146 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mystyle}[2026/03/18 Reusable report style]
+
+\RequirePackage{fontspec}
+\setmainfont{TeX Gyre Termes}
+\setmonofont[Scale=MatchLowercase]{JetBrains Mono}
+\RequirePackage[french]{babel}
+\RequirePackage{geometry}
+\RequirePackage{hyperref}
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{fancyhdr}
+\RequirePackage{etoolbox}
+\RequirePackage{titlesec}
+\RequirePackage{lastpage}
+\RequirePackage{setspace}
+\RequirePackage{caption}
+\RequirePackage{float}
+\RequirePackage{booktabs}
+\RequirePackage{enumitem}
+\RequirePackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+
+\makeatletter
+\newcommand{\@program}{}
+\newcommand{\program}[1]{\gdef\@program{#1}}
+\newcommand{\@schoolyear}{}
+\newcommand{\schoolyear}[1]{\gdef\@schoolyear{#1}}
+\newcommand{\@reportfootername}{}
+\newcommand{\reportfootername}[1]{\gdef\@reportfootername{#1}}
+\newcommand{\@leftheaderlogo}{}
+\newcommand{\leftheaderlogo}[1]{\gdef\@leftheaderlogo{#1}}
+\newcommand{\@rightheaderlogo}{}
+\newcommand{\rightheaderlogo}[1]{\gdef\@rightheaderlogo{#1}}
+\newcommand{\@leftheaderlogoheight}{1.2cm}
+\newcommand{\leftheaderlogoheight}[1]{\gdef\@leftheaderlogoheight{#1}}
+\newcommand{\@rightheaderlogoheight}{1.8cm}
+\newcommand{\rightheaderlogoheight}[1]{\gdef\@rightheaderlogoheight{#1}}
+\newcommand{\@logogap}{3cm}
+\newcommand{\logogap}[1]{\gdef\@logogap{#1}}
+
+\renewcommand{\maketitle}{%
+    \hypersetup{pageanchor=false}%
+    \begin{titlepage}
+        \thispagestyle{empty}%
+        \vspace*{\dimexpr0.5\paperheight-1in-\topmargin-\headheight-\headsep-\topskip\relax}%
+        \begin{center}
+            {\huge\bfseries \@title\par}
+            \vspace{1cm}
+            {\Large \@author\par}
+            \vspace{0.5cm}
+            {\Large \@program\par}
+            {\Large \textit{\@schoolyear} \par}
+            \vfill
+            {\large \@date\par}
+        \end{center}
+    \end{titlepage}%
+    \setcounter{page}{1}%
+    \hypersetup{pageanchor=true}%
+}
+
+\newcommand{\renderheaderlogos}{%
+    \ifdefempty{\@leftheaderlogo}{}{
+        \raisebox{-0.5\height}{\includegraphics[height=\@leftheaderlogoheight]{\@leftheaderlogo}}%
+    }%
+    \ifboolexpr{not test {\ifdefempty{\@leftheaderlogo}} and not test {\ifdefempty{\@rightheaderlogo}}}{
+        \hspace{\@logogap}%
+    }{}%
+    \ifdefempty{\@rightheaderlogo}{}{
+        \raisebox{-0.5\height}{\includegraphics[height=\@rightheaderlogoheight]{\@rightheaderlogo}}%
+    }%
+}
+\newcommand{\renderfootername}{\@reportfootername}
+\makeatother
+
+\geometry{
+    a4paper,
+    margin=2.5cm,
+    top=0.4cm,
+    headheight=2cm,
+    headsep=0.5cm,
+    includehead
+}
+\graphicspath{{assets/}{figures/}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\lfoot{\renderfootername}
+\cfoot{Page \thepage~sur~\pageref{LastPage}}
+\rfoot{\today}
+
+\renewcommand{\labelitemi}{\textbullet}
+\frenchsetup{StandardItemLabels=true,ThinColonSpace=true}
+
+\renewcommand{\thesection}{\Roman{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
+
+\setstretch{1.08}
+\setlength{\parskip}{0.22\baselineskip}
+\setlength{\parindent}{0pt}
+\setlength{\intextsep}{0.45\baselineskip}
+\setlength{\textfloatsep}{0.55\baselineskip}
+\setlength{\floatsep}{0.45\baselineskip}
+\setlength{\abovecaptionskip}{0.2\baselineskip}
+\setlength{\belowcaptionskip}{0pt}
+\captionsetup{skip=0.2\baselineskip}
+
+\setlist[itemize]{topsep=0.2\baselineskip,itemsep=0.08\baselineskip,parsep=0pt,partopsep=0pt,leftmargin=1.5em}
+\setlist[enumerate]{topsep=0.2\baselineskip,itemsep=0.08\baselineskip,parsep=0pt,partopsep=0pt,leftmargin=1.8em}
+\setlist[description]{topsep=0.2\baselineskip,itemsep=0.08\baselineskip,parsep=0pt,partopsep=0pt,style=nextline,leftmargin=1.8em}
+
+\makeatletter
+\pretocmd{\tableofcontents}{\begingroup\setlength{\parskip}{0pt}}{}{}
+\apptocmd{\tableofcontents}{\endgroup}{}{}
+\renewcommand*\l@section[2]{%
+    \ifnum\c@tocdepth>\z@
+        \addpenalty{\@secpenalty}%
+        \addvspace{0.25\baselineskip}%
+        \setlength\@tempdima{1.5em}%
+        \begingroup%
+            \parindent\z@\rightskip\@pnumwidth%
+            \parfillskip-\@pnumwidth%
+            \leavevmode\bfseries%
+            \advance\leftskip\@tempdima%
+            \hskip-\leftskip%
+            #1\nobreak\hfil\nobreak\hb@xt@\@pnumwidth{\hss#2}\par%
+        \endgroup%
+    \fi
+}
+\makeatother
+
+\titleformat{\section}{\normalfont\fontsize{16}{19.2}\bfseries}{\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{3.1ex plus 0.8ex minus .2ex}{0pt}
+
+\titleformat{\subsection}{\normalfont\fontsize{14}{16.8}\bfseries}{\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{2ex plus 0.6ex minus .2ex}{0pt}
+
+\titleformat{\subsubsection}{\normalfont\fontsize{12}{14.4}\bfseries}{\thesubsubsection}{1em}{}
+\titlespacing*{\subsubsection}{0pt}{1.4ex plus 0.4ex minus .2ex}{0pt}
+
+\chead{\renderheaderlogos}

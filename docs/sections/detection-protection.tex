@@ -1,0 +1,29 @@
+\section{Détection et protection}\label{sec:detection-protection}
+
+Suricata est exécuté sur la passerelle et observe les requêtes HTTP avant leur traduction d'adresse.
+Il écrit ses alertes dans un journal partagé avec l'hôte, ce qui permet de relier un rejeu du scénario à une alerte horodatée.
+La règle locale initiale illustre la détection d'un marqueur fréquemment associé à une injection SQL :
+
+\begin{quote}
+    \small\ttfamily
+    alert http any any -> 172.28.20.20 80 (msg:\textquotedbl{}LAB DVWA suspicious query token\textquotedbl;\\
+    \quad flow:to\_server,established; http.uri; content:\textquotedbl{}union\textquotedbl; nocase;\\
+    \quad sid:1000001; rev:1;)
+\end{quote}
+
+Cette signature est volontairement spécifique à la maquette.
+Elle doit être adaptée au trafic réellement produit et évaluée face aux faux positifs et aux faux négatifs.
+Pour le scénario de force brute sur DVWA, le groupe définira une détection distincte fondée sur un indicateur observable, par exemple la répétition de requêtes d'authentification sur une fenêtre temporelle.
+Le choix sera justifié à partir des journaux collectés et de la documentation Suricata~\cite{suricata}.
+La protection de base de la passerelle applique une politique restrictive : les flux transférés sont refusés par défaut, puis seul le trafic HTTP de Kali vers DVWA est autorisé.
+Après une alerte validée, le script de démonstration insère une règle iptables isolant l'adresse Kali.
+Cette réponse est délibérément manuelle, explicite et réversible ; elle évite d'automatiser un blocage sur la seule base d'une signature pédagogique.
+La validation suivra le protocole ci-dessous :
+\begin{enumerate}
+    \item Rejouer le scénario sans protection additionnelle et conserver l'alerte Suricata correspondante.
+    \item Appliquer la règle de blocage sur la passerelle après confirmation de l'alerte.
+    \item Rejouer le même scénario et constater l'échec du flux vers DVWA\@.
+    \item Retirer la règle, puis vérifier le retour à l'état initial.
+\end{enumerate}
+
+Le blocage de l'adresse source protège efficacement cette démonstration, mais reste une mesure grossière : il ne corrige pas la vulnérabilité applicative, peut bloquer un utilisateur légitime et ne remplace pas les contre-mesures propres à l'application.

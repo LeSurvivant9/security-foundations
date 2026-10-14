@@ -1,0 +1,32 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime evidence (retain only the directory placeholder)
+evidence/*
+!evidence/.gitkeep
+
+# LaTeX build output
+docs/out/
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# Editor and operating-system files
+.DS_Store
+.idea/
+.junie/
+
+# Python tooling cache
+__pycache__/
+*.py[cod]
+
+# JavaScript tooling cache (used internally by the Prettier pre-commit hook)
+node_modules/

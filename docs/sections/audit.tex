@@ -1,0 +1,27 @@
+\section{Audit et identification des vulnérabilités}\label{sec:audit}
+
+L'audit est limité aux adresses de la maquette.
+Il commence par l'identification des hôtes et des services accessibles depuis Kali, puis par l'observation contrôlée des fonctions de DVWA\@.
+Les commandes, dates et sorties utiles doivent être conservées dans le répertoire de preuves du groupe afin que les résultats soient reproductibles.
+La reconnaissance réseau doit notamment confirmer que seul le service HTTP de DVWA est accessible depuis le réseau \texttt{attack}, et que la base MariaDB n'est pas directement atteignable.
+Cette vérification contrôle aussi l'efficacité de la segmentation retenue.
+Section~\ref{sec:maquette} présente les mécanismes mis en place.
+
+\begin{table}[H]
+    \centering
+    \caption{Synthèse des surfaces d'attaque à vérifier.}\label{tab:audit}
+    \begin{tabular}{@{}p{0.24\textwidth}p{0.27\textwidth}p{0.36\textwidth}@{}}
+        \toprule
+        Élément & Risque étudié & Validation attendue \\
+        \midrule
+        Interface web DVWA & Injection SQL & Confirmer le comportement vulnérable avec le niveau de sécurité retenu. \\
+        Authentification DVWA & Force brute & Identifier la présence ou l'absence de mécanismes de limitation. \\
+        Service MariaDB & Exposition réseau & Vérifier l'absence d'accès direct depuis Kali. \\
+        Passerelle & Contournement du filtrage & Vérifier que seuls les flux HTTP prévus transitent. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Les vulnérabilités de DVWA sont intentionnelles et documentées par le projet~\cite{dvwa}.
+Elles ne dispensent pas de décrire précisément la configuration utilisée : niveau de sécurité DVWA, comptes de test, version des images et date des essais.
+Ces paramètres conditionnent la reproductibilité et l'interprétation des résultats.
