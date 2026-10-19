@@ -12,11 +12,16 @@ services:
       - ALL
     cap_add:
       - NET_ADMIN
+      - NET_RAW
+      - NET_BIND_SERVICE
+      # Required by Nmap's packaged binary for the authorised lab scan.
+      - NET_RAW
     networks:
       attack:
         ipv4_address: 172.28.10.10
     volumes:
       - ./evidence:/home/kali/evidence
+      - ./scenarios:/opt/scenarios:ro
     command: ["/usr/local/bin/init-route.sh"]
     healthcheck:
       test:
@@ -54,7 +59,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "pgrep -f '[s]uricata' >/dev/null && ip -o -4 addr show | grep -q '172\\.28\\.10\\.' && ip -o -4 addr show | grep -q '172\\.28\\.20\\.'",
+          "test -f /run/suricata-ready && pgrep -f '[s]uricata' >/dev/null && ip -o -4 addr show | grep -q '172\\.28\\.10\\.' && ip -o -4 addr show | grep -q '172\\.28\\.20\\.'",
         ]
       interval: 10s
       timeout: 5s
@@ -65,6 +70,8 @@ services:
   dvwa:
     # Multi-architecture index (linux/amd64 and linux/arm64) verified on 2026-10-19.
     image: ghcr.io/digininja/dvwa@sha256:8029450682bd70e2e8cd1ffe8e46dd1885ff2a913296091cebfa8ba0a7d36498
+    ports:
+      - "127.0.0.1:8080:80"
     environment:
       DB_SERVER: db
       DB_DATABASE: dvwa

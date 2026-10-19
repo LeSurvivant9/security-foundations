@@ -14,12 +14,14 @@ Kali (172.28.10.10)
                                   └─ data ── MariaDB (172.28.30.30)
 ```
 
-Les trois réseaux Docker n'exposent aucun port vers l'hôte : l'accès à DVWA
-passe donc obligatoirement par la passerelle. Kali et la passerelle suppriment
-également leur route par défaut au démarrage, afin de ne joindre que les sous-
-réseaux du lab. N'ajoutez pas de ports publiés. Le flag Docker `internal` n'est
-pas utilisé sur `attack` et `app`, car il empêche le routage inter-réseaux
-nécessaire à la passerelle sous Docker Desktop.
+Les flux de démonstration passent obligatoirement par la passerelle. DVWA
+publie toutefois son interface visuelle uniquement sur `127.0.0.1:8080` : elle
+est disponible sur l'hôte à `http://localhost:8080`, mais cet accès local ne
+traverse pas Suricata et ne doit pas être utilisé pour les attaques de la
+démonstration. Kali et la passerelle suppriment également leur route par défaut
+au démarrage, afin de ne joindre que les sous-réseaux du lab. Le flag Docker
+`internal` n'est pas utilisé sur `attack` et `app`, car il empêche le routage
+inter-réseaux nécessaire à la passerelle sous Docker Desktop.
 MariaDB est seulement raccordée au réseau `data`; Kali et la passerelle ne
 peuvent pas la joindre directement.
 
@@ -51,8 +53,50 @@ docker compose exec --user kali kali bash
 ```
 
 Depuis ce terminal, l'application est disponible à `http://172.28.20.20/`.
-La procédure de configuration initiale propre à DVWA s'effectue uniquement
-depuis ce lab. Ne publiez pas le service vers le réseau local.
+L'interface visuelle locale est à `http://localhost:8080`. Elle sert à observer
+DVWA ou à expliquer son fonctionnement ; les scénarios et leur détection sont
+toujours exécutés depuis Kali.
+
+L'image Kali contient aussi `sqlmap` pour l'analyse de l'injection SQL de cette
+maquette, `hydra` pour comparer une automatisation d'authentification, et `tldr`
+(fourni par le paquet `tealdeer`) pour consulter les résumés de commandes.
+`sqlmap` et Hydra doivent rester limités à DVWA, avec les identifiants de test
+du laboratoire ; ne leur fournissez jamais une cible extérieure au projet.
+Le cache `tldr` est téléchargé pendant la construction de l'image car Kali n'a
+volontairement pas de route Internet une fois le laboratoire démarré.
+
+```sh
+docker compose exec --user kali kali tldr sqlmap
+docker compose exec --user kali kali sqlmap --help
+docker compose exec --user kali kali hydra --help
+```
+
+## Scénarios reproductibles
+
+Les scripts dans `scenarios/` s'exécutent exclusivement dans le conteneur Kali,
+enregistrent leurs sorties sous `evidence/` et utilisent une liste de mots de
+passe volontairement courte. Initialiser DVWA efface et recrée les données de
+ce laboratoire : n'exécutez cette commande que pour repartir d'un état propre.
+
+```sh
+make reset   # initialise DVWA et sélectionne le niveau Low
+make recon   # scan limité de DVWA depuis Kali
+make brute   # rejeu de cinq tentatives d'authentification maximum
+make sqli    # rejeu d'une requête SQLi contrôlée
+```
+
+Dans un second terminal, observez les alertes avant de passer à la protection :
+
+```sh
+make alerts
+make block     # isole Kali après validation manuelle de l'alerte
+make brute     # le rejeu doit maintenant échouer
+make unblock   # revient à la politique de base
+```
+
+Le scénario SQLi emploie la charge `1' OR '1'='1` uniquement contre DVWA au
+niveau Low. Il démontre une lecture de plusieurs lignes factices ; il ne tente
+ni écriture, ni exfiltration hors de la maquette.
 
 ## Observer les alertes
 
@@ -61,9 +105,10 @@ docker compose logs -f gateway
 tail -f evidence/suricata/fast.log
 ```
 
-La règle `gateway/rules/local.rules` est un exemple pédagogique. Elle détecte
-un jeton de requête suspect destiné à DVWA. Le groupe doit l'adapter au scénario
-autorisé, la tester et expliquer son choix dans le rapport.
+Les règles `gateway/rules/local.rules` détectent les requêtes répétées vers le
+formulaire Brute Force et le motif SQLi du scénario. Elles sont volontairement
+spécifiques à cette maquette : le groupe doit expliquer leurs limites et les
+évaluer face aux faux positifs et faux négatifs dans le rapport.
 
 ## Démonstration de protection
 

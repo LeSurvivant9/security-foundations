@@ -2,19 +2,19 @@
 
 Suricata est exécuté sur la passerelle et observe les requêtes HTTP avant leur traduction d'adresse.
 Il écrit ses alertes dans un journal partagé avec l'hôte, ce qui permet de relier un rejeu du scénario à une alerte horodatée.
-La règle locale initiale illustre la détection d'un marqueur fréquemment associé à une injection SQL :
+Deux règles locales sont dédiées aux scénarios : l'une détecte au moins cinq requêtes vers le formulaire de force brute en soixante secondes ; l'autre recherche une apostrophe encodée dans la ressource SQLi.
+Par exemple, la règle SQLi est la suivante :
 
 \begin{quote}
     \small\ttfamily
-    alert http any any -> 172.28.20.20 80 (msg:\textquotedbl{}LAB DVWA suspicious query token\textquotedbl;\\
-    \quad flow:to\_server,established; http.uri; content:\textquotedbl{}union\textquotedbl; nocase;\\
-    \quad sid:1000001; rev:1;)
+    alert http any any -> 172.28.20.20 80 (msg:\textquotedbl{}LAB DVWA SQL injection pattern\textquotedbl;\\
+    \quad flow:to\_server,established; http.uri.raw; content:\textquotedbl{}/vulnerabilities/sqli/\textquotedbl;\\
+    \quad content:\textquotedbl{}\%27\textquotedbl; nocase; sid:1000002; rev:1;)
 \end{quote}
 
-Cette signature est volontairement spécifique à la maquette.
-Elle doit être adaptée au trafic réellement produit et évaluée face aux faux positifs et aux faux négatifs.
-Pour le scénario de force brute sur DVWA, le groupe définira une détection distincte fondée sur un indicateur observable, par exemple la répétition de requêtes d'authentification sur une fenêtre temporelle.
-Le choix sera justifié à partir des journaux collectés et de la documentation Suricata~\cite{suricata}.
+Ces signatures sont volontairement spécifiques à la maquette.
+Elles doivent être évaluées face aux faux positifs et aux faux négatifs, notamment pour les autres encodages d'une charge SQLi.
+Le choix est justifié à partir des journaux collectés et de la documentation Suricata~\cite{suricata}.
 La protection de base de la passerelle applique une politique restrictive : les flux transférés sont refusés par défaut, puis seul le trafic HTTP de Kali vers DVWA est autorisé.
 Après une alerte validée, le script de démonstration insère une règle iptables isolant l'adresse Kali.
 Cette réponse est délibérément manuelle, explicite et réversible ; elle évite d'automatiser un blocage sur la seule base d'une signature pédagogique.

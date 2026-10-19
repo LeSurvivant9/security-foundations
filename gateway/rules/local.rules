@@ -1,4 +1,4 @@
-# Teaching-lab detection rule.  It flags a common suspicious query token sent
-# to the intentionally vulnerable web application.  Tune or replace it once
-# the group has selected and documented its authorised attack scenario.
-alert http any any -> 172.28.20.20 80 (msg:"LAB DVWA suspicious query token"; flow:to_server,established; http.uri; content:"union"; nocase; sid:1000001; rev:1;)
+# Rules restricted to the intentionally vulnerable DVWA service in this lab.
+# They are teaching signatures, not production-grade SQL injection detection.
+alert http any any -> 172.28.20.20 80 (msg:"LAB DVWA repeated login attempts"; flow:to_server,established; http.uri; content:"/vulnerabilities/brute/"; nocase; content:"username="; nocase; threshold:type threshold,track by_src,count 5,seconds 60; sid:1000001; rev:2;)
+alert http any any -> 172.28.20.20 80 (msg:"LAB DVWA SQL injection pattern"; flow:to_server,established; http.uri.raw; content:"/vulnerabilities/sqli/"; nocase; content:"%27"; nocase; sid:1000002; rev:1;)

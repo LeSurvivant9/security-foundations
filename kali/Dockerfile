@@ -7,14 +7,20 @@ RUN apt-get update \
         ca-certificates \
         curl \
         dnsutils \
+        hydra \
         iproute2 \
         iputils-ping \
         netcat-traditional \
         nmap \
+        sqlmap \
+        tealdeer \
         tcpdump \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN useradd --create-home --shell /bin/bash kali
+# Populate the command cheat-sheet cache at build time: the running Kali
+# container deliberately has no default route outside the lab.
+RUN useradd --create-home --shell /bin/bash kali \
+    && su - kali -c 'tldr --update'
 
 COPY --chmod=755 init-route.sh /usr/local/bin/init-route.sh
