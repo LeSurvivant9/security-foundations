@@ -29,7 +29,6 @@ jobs:
           zricethezav/gitleaks:v8.30.1
           detect --source . --no-git --redact
 
-      # The full stack is not started in CI: DVWA is pinned for ARM64 while
-      # GitHub-hosted Ubuntu runners are AMD64. The custom images are portable.
+      # The full stack is not started in CI; this job only builds the custom images.
       - name: Build local lab images
         run: docker compose --env-file .env.example build kali gateway

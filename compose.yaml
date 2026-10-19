@@ -63,8 +63,8 @@ services:
     restart: "no"
 
   dvwa:
-    # ARM64 manifest pinned after verification on 2026-10-14.
-    image: ghcr.io/digininja/dvwa@sha256:a1087ec6fe54bf83da65c772377f81534b8c9bf085f11507ad0f9509124a1e08
+    # Multi-architecture index (linux/amd64 and linux/arm64) verified on 2026-10-19.
+    image: ghcr.io/digininja/dvwa@sha256:8029450682bd70e2e8cd1ffe8e46dd1885ff2a913296091cebfa8ba0a7d36498
     environment:
       DB_SERVER: db
       TZ: ${TZ:-Etc/UTC}

@@ -36,8 +36,10 @@ Les valeurs de `.env` sont exclusivement destinées au lab. Le fichier est
 ignoré par Git ; partagez-le uniquement dans le canal privé du groupe, et ne
 réutilisez jamais ces identifiants.
 
-Les images externes sont épinglées par digest afin que tous les membres
-obtiennent la même image. Elles ont été vérifiées pour `linux/arm64`.
+Les images externes sont épinglées par digest d'index multi-architecture afin
+que tous les membres obtiennent la même version, avec le manifeste adapté à
+leur processeur. Elles ont été vérifiées pour `linux/arm64` et `linux/amd64`.
+Sous Windows, Docker Desktop doit être configuré pour les conteneurs Linux.
 
 ## Utilisation de Kali
 
@@ -117,4 +119,4 @@ uv tool run pre-commit run --all-files
 
 La GitHub Action `Validation` rejoue ces contrôles à chaque push sur `main` et
 à chaque pull request. Elle construit uniquement les images locales Kali et
-gateway : elle ne démarre pas le lab et ne lance pas DVWA, épinglée pour ARM64.
+gateway : elle ne démarre pas le lab.
