@@ -82,6 +82,7 @@ ce laboratoire : n'exécutez cette commande que pour repartir d'un état propre.
 make reset   # initialise DVWA et sélectionne le niveau Low
 make recon   # scan limité de DVWA depuis Kali
 make brute   # rejeu de cinq tentatives d'authentification maximum
+make hydra   # même rejeu avec Hydra, limité aux cinq mots de passe du lab
 make sqli    # rejeu d'une requête SQLi contrôlée
 ```
 
@@ -106,7 +107,7 @@ tail -f evidence/suricata/fast.log
 ```
 
 Les règles `gateway/rules/local.rules` détectent les requêtes répétées vers le
-formulaire Brute Force et le motif SQLi du scénario. Elles sont volontairement
+formulaire Brute Force (qu'elles soient rejouées avec curl ou Hydra) et le motif SQLi du scénario. Elles sont volontairement
 spécifiques à cette maquette : le groupe doit expliquer leurs limites et les
 évaluer face aux faux positifs et faux négatifs dans le rapport.
 
