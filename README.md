@@ -83,7 +83,8 @@ make reset   # initialise DVWA et sélectionne le niveau Low
 make recon   # scan limité de DVWA depuis Kali
 make brute   # rejeu de cinq tentatives d'authentification maximum
 make hydra   # même rejeu avec Hydra, limité aux cinq mots de passe du lab
-make sqli    # rejeu d'une requête SQLi contrôlée
+make sqli    # rejeu manuel (curl) d'une requête SQLi contrôlée
+make sqlmap  # détection automatisée de cette même SQLi, sans extraction
 ```
 
 Dans un second terminal, observez les alertes avant de passer à la protection :
@@ -95,9 +96,13 @@ make brute     # le rejeu doit maintenant échouer
 make unblock   # revient à la politique de base
 ```
 
-Le scénario SQLi emploie la charge `1' OR '1'='1` uniquement contre DVWA au
-niveau Low. Il démontre une lecture de plusieurs lignes factices ; il ne tente
-ni écriture, ni exfiltration hors de la maquette.
+Le scénario SQLi manuel emploie la charge `1' OR '1'='1` uniquement contre DVWA
+au niveau Low. Il démontre une lecture de plusieurs lignes factices ; il ne
+tente ni écriture, ni exfiltration hors de la maquette. `make sqlmap` emploie la
+même session DVWA, mais délègue la détection au programme avec des tests
+booléens bornés. Il n'utilise aucune option d'énumération ou d'extraction telle
+que `--dump`. Les deux scénarios doivent être comparés à partir de leurs
+requêtes, de leurs sorties conservées sous `evidence/` et des alertes générées.
 
 ## Observer les alertes
 
@@ -107,7 +112,7 @@ tail -f evidence/suricata/fast.log
 ```
 
 Les règles `gateway/rules/local.rules` détectent les requêtes répétées vers le
-formulaire Brute Force (qu'elles soient rejouées avec curl ou Hydra) et le motif SQLi du scénario. Elles sont volontairement
+formulaire Brute Force (qu'elles soient rejouées avec curl ou Hydra) et le motif SQLi des scénarios manuel et sqlmap. Elles sont volontairement
 spécifiques à cette maquette : le groupe doit expliquer leurs limites et les
 évaluer face aux faux positifs et faux négatifs dans le rapport.
 

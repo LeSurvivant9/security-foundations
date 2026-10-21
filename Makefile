@@ -3,7 +3,7 @@
 COMPOSE := docker compose
 KALI := $(COMPOSE) exec -T --user kali kali
 
-.PHONY: help up down reset recon brute hydra sqli alerts block unblock validate
+.PHONY: help up down reset recon brute hydra sqli sqlmap alerts block unblock validate
 
 help:
 	@printf '%s\n' \
@@ -12,7 +12,8 @@ help:
 	  'make recon    Run the authorised service discovery from Kali.' \
 	  'make brute    Replay the short DVWA login scenario from Kali.' \
 	  'make hydra    Replay the same short DVWA login scenario with Hydra.' \
-	  'make sqli     Replay the controlled DVWA SQL injection scenario.' \
+	  'make sqli     Replay the controlled SQL injection manually with curl.' \
+	  'make sqlmap   Detect the same SQL injection with bounded sqlmap checks.' \
 	  'make alerts   Follow Suricata alerts.' \
 	  'make block    Isolate Kali at the gateway after validating an alert.' \
 	  'make unblock  Restore the baseline gateway policy.' \
@@ -38,6 +39,9 @@ hydra:
 
 sqli:
 	$(KALI) /opt/scenarios/03-sqli.sh
+
+sqlmap:
+	$(KALI) /opt/scenarios/05-sqlmap.sh
 
 alerts:
 	tail -F evidence/suricata/fast.log
